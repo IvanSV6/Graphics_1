@@ -5,13 +5,15 @@ import struct
 
 def main():
     root = Tk()
-    root.geometry("300x250")
+    root.geometry("420x200")
     open_button = ttk.Button(text="Открыть", command=open_picture_dialog)
     open_button.grid(row=0, column=0, padx=10)
     process_button = ttk.Button(text="Обработать", command=process_picture)
     process_button.grid(row=0, column=1, padx=10)
     save_button = ttk.Button(text="Сохранить", command=save_picture)
     save_button.grid(row=0, column=2, padx=10)
+    save_pbm_button = ttk.Button(text="Сохранить в pbm", command=save_pbm)
+    save_pbm_button.grid(row=0, column=3, padx=10)
     root.mainloop()
 
 def open_picture_dialog():
@@ -19,6 +21,7 @@ def open_picture_dialog():
     global width
     global height
     global bits_per_pixel
+    global file_path
     bits_per_pixel = 0
     file_path = filedialog.askopenfilename(
         title="Выберите BMP файл",
@@ -58,6 +61,33 @@ def open_picture_dialog():
         pixels.reverse()
         show_picture()
 
+
+def save_pbm():
+    if pixels is None:
+        print("Нет данных для сохранения!")
+        return
+
+    file_path = filedialog.asksaveasfilename(
+        title="Сохранить PBM файл",
+        defaultextension=".pbm",
+        filetypes=[("PBM files", "*.pbm")]
+    )
+
+    if not file_path:
+        return
+
+    with open(file_path, 'w') as file:
+        file.write("P1\n")
+        file.write(f"{width} {height}\n")
+
+        for y in range(height):
+            for x in range(width):
+                r, g, b = pixels[y][x][:3]
+                value = 1 if r > 127 else 0
+                file.write(f"{value} ")
+            file.write("\n")
+
+    showinfo("Успех", "PBM файл успешно сохранен")
 def process_picture():
     pixels[0][0] = (0, 127, 255, 255)
     pixels[0][-1] = (127, 0, 255, 255)
